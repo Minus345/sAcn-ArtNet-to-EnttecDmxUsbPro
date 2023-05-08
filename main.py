@@ -18,6 +18,7 @@ dmx = Controller(my_port)
 dmxPacket = [0] * 512
 
 receiver.join_multicast(1)
+print("starting")
 
 
 @receiver.listen_on('universe', universe=1)  # listens on universe 1
