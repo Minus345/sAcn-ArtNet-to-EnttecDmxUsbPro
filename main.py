@@ -13,14 +13,14 @@ print('Argument List:', str(sys.argv))
 receiver = sacn.sACNreceiver()
 receiver.start()  # start the receiving thread
 
-if platform == "linux" or platform == "linux2":
-    # linux
-    print("linux")
-    dmx = Controller(sys.argv[1], dmx_size=512)
-elif platform == "win32":
-    # Windows...
-    print("windows")
-    dmx = Controller(sys.argv[1], dmx_size=512)
+    if platform == "linux" or platform == "linux2":
+        # linux
+        print("linux")
+        dmx = Controller(sys.argv[1], dmx_size=512)
+    elif platform == "win32":
+        # Windows...
+        print("windows")
+        dmx = Controller(sys.argv[1], dmx_size=512)
 
     # my_port = get_port_by_serial_number('EN160150A')
     # my_port = get_port_by_product_id(24577)

@@ -15,6 +15,6 @@ find usb Port
 ## Parameters:
 
 - **usbPort:**
-    - linux: `COM4`
-    - windows: `/dev/ttyUSB0`
+    - linux: `/dev/ttyUSB0`
+    - windows: `COM4`
 - **sAcn Universe**
