@@ -3,8 +3,9 @@
 sAcn to EnttecDmxUsbPro phyton script
 
 Tipp:
-`python -m DMXEnttecPro.utils`  
-find usb Port
+- `python -m DMXEnttecPro.utils`  
+  find usb Port
+- you have to be root
 
 ## Used librarys:
 
