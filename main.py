@@ -43,19 +43,18 @@ if mode == "sacn":
     receiver.start()
     receiver.join_multicast(universe)
 
+
+    @receiver.listen_on('universe', universe=universe)
+    def callback(packet):
+        counter2: int = 0
+        for x in packet.dmxData:
+            dmxPacket[counter2] = x
+            counter2 = counter2 + 1
+
 if mode == "artnet":
     a = StupidArtnetServer()
     u1_listener = a.register_listener(
         universe, callback_function=test_callback)
-
-
-# sacn
-@receiver.listen_on('universe', universe=universe)  # listens on universe 1
-def callback(packet):  # packet type: sacn.DataPacket
-    counter2: int = 0
-    for x in packet.dmxData:
-        dmxPacket[counter2] = x
-        counter2 = counter2 + 1
 
 
 def handler(signum, frame):
