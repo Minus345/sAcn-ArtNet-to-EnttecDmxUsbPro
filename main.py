@@ -71,5 +71,5 @@ while True:
         dmx.set_channel(counter, x)
         counter = counter + 1
     dmx.submit()
-    print(dmxPacket)
-    print("send")
+    #print(dmxPacket)
+    #print("send")
