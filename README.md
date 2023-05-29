@@ -21,6 +21,6 @@ Tipp:
     - linux: `/dev/ttyUSB0`
     - windows: `COM4`
 - **Universe**
-    - Use specific Port
+    - Use specific Port form Artnet/sAcn
 - **Mode**
     - sacn | artnet 
