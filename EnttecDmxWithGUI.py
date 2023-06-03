@@ -1,3 +1,4 @@
+import sys
 from tkinter import ttk
 
 import serial.tools.list_ports as slp
@@ -28,6 +29,7 @@ def test_callback(data):
 
 class App:
     def __init__(self, root):
+        self.thread1 = None
         self.tree = None
         self.radio = IntVar()
 
@@ -137,9 +139,15 @@ class App:
         self.UsbPort = detailsList[0]
 
     def stop(self):
+        print("stop")
         global running
         running = False
-        quit()
+        if self.thread1 is None:
+            root.destroy()
+            sys.exit("Stopped")
+        self.thread1.join()
+        root.destroy()
+        sys.exit("Stopped")
 
     def updateNoData(self, t):
         self.NoData.configure(text=t)
@@ -157,7 +165,7 @@ class App:
     def SelectMode(self):
         # sAcn
         if self.mode == "sacn":
-            receiver = sacn.sACNreceiver(bind_address="192.168.178.131")
+            receiver = sacn.sACNreceiver() #bind_address="192.168.178.131"
             receiver.start()
             receiver.join_multicast(int(self.Universe))
 
@@ -171,6 +179,7 @@ class App:
         # ArtNet
         if self.mode == "artnet":
             a = StupidArtnetServer()
+
             u1_listener = a.register_listener(
                 int(self.Universe), callback_function=test_callback)
 
@@ -192,9 +201,9 @@ class App:
         print("univers: " + self.Universe)
         print("port: " + self.UsbPort)
 
-        thread1 = Thread(target=task, args=(self,))
+        self.thread1 = Thread(target=task, args=(self,))
         # run the thread
-        thread1.start()
+        self.thread1.start()
         # wait for the thread to finish
         # print('Waiting for the thread...')
 
@@ -218,6 +227,7 @@ def task(self):
             dmx.set_channel(counter, x)
             counter = counter + 1
         dmx.submit()
+    dmx.close()
         # print(dmxPacket)
         # print("send"))
 
