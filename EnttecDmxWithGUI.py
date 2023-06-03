@@ -1,8 +1,6 @@
-# SuperFastPython.com
-# example of running a function in another thread
-from time import sleep
-from threading import Thread
-import tkinter as tk
+from tkinter import ttk
+
+import serial.tools.list_ports as slp
 from time import sleep
 import sacn
 import tkinter as tk
@@ -11,6 +9,8 @@ from tkinter import *
 from threading import Thread
 from DMXEnttecPro import *
 from sys import platform
+
+from DMXEnttecPro.utils import show_port_details
 from stupidArtnet import StupidArtnetServer
 
 dmxPacket = [0] * 512
@@ -28,19 +28,20 @@ def test_callback(data):
 
 class App:
     def __init__(self, root):
+        self.tree = None
         self.radio = IntVar()
 
         self.UsbPortVar = StringVar()
         self.UniverseVar = StringVar()
         self.NoDataText = StringVar()
 
-        self.UsbPort = "Com1"
+        self.UsbPort = "null"
         self.Universe = 1
-        self.mode = "null"
+        self.mode = "not started"
 
         # setting title
         root.title("Enttec Dmx Pro")
-        #root.attributes('-fullscreen', True)
+        # root.attributes('-fullscreen', True)
         # setting window size
         width = 480
         height = 320
@@ -58,33 +59,19 @@ class App:
         Header["text"] = "ArtNet / sAcn to Enttec Dmx Usb Pro"
         Header.place(x=0, y=0, width=478, height=32)
 
-        UsbEntry = tk.Entry(root, textvariable=self.UsbPortVar)
-        UsbEntry["borderwidth"] = "1px"
-        ft = tkFont.Font(family='Times', size=13)
-        UsbEntry["font"] = ft
-        UsbEntry["justify"] = "center"
-        UsbEntry.place(x=100, y=50, width=90, height=40)
-
-        UsbPortLabel = tk.Label(root)
-        ft = tkFont.Font(family='Times', size=13)
-        UsbPortLabel["font"] = ft
-        UsbPortLabel["justify"] = "center"
-        UsbPortLabel["text"] = "USB Port:"
-        UsbPortLabel.place(x=10, y=50, width=90, height=40)
-
         Mode = tk.Label(root)
         ft = tkFont.Font(family='Times', size=13)
         Mode["font"] = ft
         Mode["justify"] = "center"
         Mode["text"] = "Mode:"
-        Mode.place(x=10, y=100, width=90, height=40)
+        Mode.place(x=10, y=50, width=90, height=40)
 
         ButtonSAcn = tk.Radiobutton(root, variable=self.radio, value=1)
         ft = tkFont.Font(family='Times', size=13)
         ButtonSAcn["font"] = ft
         ButtonSAcn["justify"] = "center"
         ButtonSAcn["text"] = "sAcn"
-        ButtonSAcn.place(x=110, y=100, width=90, height=40)
+        ButtonSAcn.place(x=110, y=50, width=90, height=40)
         ButtonSAcn["command"] = self.ModeSAcn
 
         ButtonArtNet = tk.Radiobutton(root, variable=self.radio, value=2)
@@ -92,7 +79,7 @@ class App:
         ButtonArtNet["font"] = ft
         ButtonArtNet["justify"] = "center"
         ButtonArtNet["text"] = "ArtNet"
-        ButtonArtNet.place(x=220, y=100, width=90, height=40)
+        ButtonArtNet.place(x=220, y=50, width=90, height=40)
         ButtonArtNet["command"] = self.ModeArtNet
 
         UniverseLable = tk.Label(root)
@@ -100,14 +87,10 @@ class App:
         UniverseLable["font"] = ft
         UniverseLable["justify"] = "center"
         UniverseLable["text"] = "Universe:"
-        UniverseLable.place(x=10, y=140, width=90, height=40)
+        UniverseLable.place(x=10, y=100, width=90, height=40)
 
-        UniverseEntry = tk.Entry(root, textvariable=self.UniverseVar)
-        UniverseEntry["borderwidth"] = "1px"
-        ft = tkFont.Font(family='Times', size=13)
-        UniverseEntry["font"] = ft
-        UniverseEntry["justify"] = "center"
-        UniverseEntry.place(x=100, y=140, width=90, height=40)
+        UniverseNumber = tk.Spinbox(root, textvariable=self.UniverseVar, from_=0, to=512)
+        UniverseNumber.place(x=100, y=100, width=90, height=40)
 
         Start = tk.Button(root)
         Start["bg"] = "#f0f0f0"
@@ -115,7 +98,7 @@ class App:
         Start["font"] = ft
         Start["justify"] = "center"
         Start["text"] = "Start"
-        Start.place(x=310, y=140, width=159, height=41)
+        Start.place(x=310, y=50, width=159, height=40)
         Start["command"] = self.thread
 
         Stop = tk.Button(root)
@@ -124,17 +107,38 @@ class App:
         Stop["font"] = ft
         Stop["justify"] = "center"
         Stop["text"] = "Stopp"
-        Stop.place(x=310, y=190, width=159, height=41)
+        Stop.place(x=310, y=90, width=159, height=40)
         Stop["command"] = self.stop
 
         self.NoData = tk.Label(root, text="null")
-        self.NoData.place(x=10, y=190, width=200, height=40)
+        self.NoData.place(x=280, y=130, width=200, height=40)
+        self.createTabel()
+
+    def createTabel(self):
+        style = ttk.Style()
+        style.theme_use('clam')
+
+        self.tree = ttk.Treeview(root, column=("Port", "Name", "Manufacture"), show='headings', height=5)
+        self.tree.column("# 1", anchor="w", width=50)
+        self.tree.heading("# 1", text="Port")
+        self.tree.column("# 2", anchor=CENTER, width=250)
+        self.tree.heading("# 2", text="Name")
+        self.tree.column("# 3", anchor=CENTER)
+        self.tree.heading("# 3", text="Manufacture")
+
+        for port in slp.comports():
+            self.tree.insert('', 'end', text="1", values=(port.device, port.description, port.manufacturer))
+        self.tree.place(x=5, y=180, width=470)
+
+    def selectItem(self):
+        curItem = self.tree.focus()
+        curItemDetails = self.tree.item(curItem)
+        detailsList = curItemDetails.get("values")
+        self.UsbPort = detailsList[0]
 
     def stop(self):
         global running
-        global dmx
         running = False
-        dmx.close()
         quit()
 
     def updateNoData(self, t):
@@ -153,7 +157,7 @@ class App:
     def SelectMode(self):
         # sAcn
         if self.mode == "sacn":
-            receiver = sacn.sACNreceiver()
+            receiver = sacn.sACNreceiver(bind_address="192.168.178.131")
             receiver.start()
             receiver.join_multicast(int(self.Universe))
 
@@ -172,7 +176,7 @@ class App:
 
     def thread(self):
         self.Universe = self.UniverseVar.get()
-        self.UsbPort = self.UsbPortVar.get()
+        self.selectItem()
         self.SelectMode()
         global dmx
         if platform == "win32":
@@ -201,7 +205,6 @@ def task(self):
     sleep(1)
     # display a message
     global dataIsEmpty
-    print('This is from another thread')
     while running:
         counter: int = 1
         dmxPacketEmpty = [0] * 512
@@ -215,10 +218,11 @@ def task(self):
             dmx.set_channel(counter, x)
             counter = counter + 1
         dmx.submit()
-        #print(dmxPacket)
+        # print(dmxPacket)
         # print("send"))
 
 
+show_port_details()
 root = tk.Tk()
 App(root)
 root.mainloop()

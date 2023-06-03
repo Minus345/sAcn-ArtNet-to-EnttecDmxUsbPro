@@ -1,18 +1,9 @@
 import signal
 import sacn
 import sys
-import tkinter as tk
-import tkinter.font as tkFont
-from tkinter import *
-from threading import Thread
-from time import sleep
-
 from DMXEnttecPro import Controller
 from sys import platform
 from stupidArtnet import StupidArtnetServer
-
-import Gui2
-from Gui import App
 
 
 # ArtNet
@@ -26,28 +17,6 @@ def test_callback(data):
 def handler(signum, frame):
     receiver.stop()
     exit(1)
-
-
-def returnData():
-    return dataIsEmpty
-
-
-def threaded_function():
-    print("running")
-    #root = tk.Tk()
-    #app = App(root)
-    #app.editM1(mode)
-    #app.editUnivers(str(universe))
-    #app.setEmptyLable(str(dataIsEmpty))
-    #app.Refresher()
-    #root.mainloop()
-
-
-def startThreadForGUI():
-    thread = Thread(target=threaded_function)
-    thread.start()
-    # thread.join()
-    # print("thread finished...exiting")
 
 
 if __name__ == "__main__":
@@ -98,8 +67,6 @@ if __name__ == "__main__":
         u1_listener = a.register_listener(
             universe, callback_function=test_callback)
 
-    startThreadForGUI()
-
     # main loop
     while True:
         counter: int = 1
@@ -108,7 +75,7 @@ if __name__ == "__main__":
             dataIsEmpty = "True"
         else:
             dataIsEmpty = "False"
-        #print(dataIsEmpty)
+        # print(dataIsEmpty)
         for x in dmxPacket:
             dmx.set_channel(counter, x)
             counter = counter + 1
