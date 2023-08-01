@@ -3,7 +3,7 @@
 sAcn / artnet to Enttec Dmx Usb Pro phyton script
 
 ### Setup:
-
+New: With Gui: Select your mode, select your universe and your USB device than press start. The stop button closes the application.
 Install all the libraries, plug in your Dmx Usb Pro Interface and start the programm.  
 For Windows you can use the compiled exe.
 
